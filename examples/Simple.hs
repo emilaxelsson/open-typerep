@@ -1,3 +1,5 @@
+import Control.Monad
+
 import Data.TypeRep
 
 type MyUniverse = IntType :+: BoolType
@@ -17,6 +19,10 @@ test1 = toDyn (1 :: Int) `addDyn` toDyn (2 :: Int)
   -- Prints: Just 3
 
 main = do
-    print hlist
-    print (test1 :: Maybe (Dynamic MyUniverse))
+    unless t1 $ fail "Test 1 failed"
+    unless t2 $ fail "Test 2 failed"
+    putStrLn "All tests passed"
+  where
+    t1 = show hlist == "[True,1]"
+    t2 = show (test1 :: Maybe (Dynamic MyUniverse)) == "Just 3"
 
