@@ -98,3 +98,26 @@ test-suite examples
     FlexibleContexts
     GADTs
     TypeOperators
+
+benchmark dynamic-bench
+  type: exitcode-stdio-1.0
+
+  hs-source-dirs: benchmarks
+
+  main-is: Dynamic.hs
+
+  build-depends:
+    base,
+    criterion,
+    open-typerep
+
+  default-language: Haskell2010
+
+  default-extensions:
+    FlexibleInstances
+    GADTs
+    MultiParamTypeClasses
+    TypeOperators
+
+  other-extensions:
+    TemplateHaskell
