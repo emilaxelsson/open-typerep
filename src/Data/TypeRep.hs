@@ -34,6 +34,7 @@ module Data.TypeRep
     , pNum
     , pIntegral
     , BoolType
+    , CharType
     , IntType
     , FloatType
     , ListType
