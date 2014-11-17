@@ -8,6 +8,7 @@ module Data.TypeRep
       -- * Type representations
     , Typeable
     , TypeRep
+    , typeRep
     , TypeEq
     , typeEq
     , matchCon
