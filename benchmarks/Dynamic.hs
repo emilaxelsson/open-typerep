@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 import Criterion.Main
-import Criterion.Config
+import Criterion.Types
 import Data.Monoid
 
 import Data.TypeRep
@@ -43,7 +43,7 @@ testDynBase :: Int -> Int
 testDynBase = dynSumBase . dynListBase
 
 main :: IO ()
-main = defaultMainWith (defaultConfig {cfgSummaryFile = Last $ Just "bench-results/dynamic.csv"}) (return ())
+main = defaultMainWith (defaultConfig {csvFile = Just "bench-results/dynamic.csv"})
     [ bgroup "size=1000"
        [ bench "testDyn"     $ nf testDyn     1000
        , bench "testDyn2"    $ nf testDyn2    1000
