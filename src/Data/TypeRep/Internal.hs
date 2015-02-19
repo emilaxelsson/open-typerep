@@ -7,6 +7,7 @@ module Data.TypeRep.Internal where
 
 
 import Control.Monad.Error
+import Data.Char (isAlphaNum)
 
 import Data.Constraint (Constraint, Dict (..))
 import Data.Proxy (Proxy (..))
@@ -57,8 +58,8 @@ class Render t => TypeEq t u
         :: (t sig1, Args (AST u) sig1)
         -> (t sig2, Args (AST u) sig2)
         -> Either String (Dict (DenResult sig1 ~ DenResult sig2))
-  -- The reason to have `Render` as a super class is not to leak unnecessary Syntactic stuff in the
-  -- type of `typeEq`.
+  -- The reason to have `Render` as a super class is not to leak unnecessary stuff in the type of
+  -- `typeEq`.
 
 instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
   where
@@ -132,20 +133,17 @@ instance Witness p t t => Witness p (AST t) t
     witSym (s :$ a) as = witSym s (a :* as)
 
 -- | Partially witness a type constraint for a reified type
-class PWitness p t u
+class (ShowClass p, Render t) => PWitness p t u
   where
     pwitSym :: t sig -> Args (AST u) sig -> Either String (Dict (p (DenResult sig)))
     pwitSym _ _ = throwError ""
+  -- The reason to have `Render` as a super class is not to leak unnecessary stuff in the type of
+  -- `pwit`.
 
 instance (PWitness p t1 t, PWitness p t2 t) => PWitness p (t1 :+: t2) t
   where
     pwitSym (InjL s) as = pwitSym s as
     pwitSym (InjR s) as = pwitSym s as
-
-instance PWitness p t t => PWitness p (AST t) t
-  where
-    pwitSym (Sym s)  as = pwitSym s as
-    pwitSym (s :$ a) as = pwitSym s (a :* as)
 
 -- | Default implementation of 'pwitSym' for types that have a 'Witness' instance
 pwitSymDefault :: Witness p t u =>
@@ -157,8 +155,18 @@ wit :: forall p t a . Witness p t t => Proxy p -> TypeRep t a -> Dict (p a)
 wit _ (TypeRep a) = witSym a (Nil :: Args (AST t) (Full a))
 
 -- | Partially witness a type constraint for a reified type
-pwit :: forall p t a . PWitness p t t => Proxy p -> TypeRep t a -> Either String (Dict (p a))
-pwit _ (TypeRep a) = pwitSym a (Nil :: Args (AST t) (Full a))
+pwit :: forall p t m a . (PWitness p t t, MonadError String m) =>
+    Proxy p -> TypeRep t a -> m (Dict (p a))
+pwit p t@(TypeRep a) = case go a Nil of
+    Left _  -> throwError $ unwords ["cannot deduce", showClass p, classArg]
+    Right a -> return a
+  where
+    st       = show t
+    classArg = if all isAlphaNum st then st else "(" ++ st ++ ")"
+
+    go :: AST t sig -> Args (AST t) sig -> Either String (Dict (p (DenResult sig)))
+    go (Sym s)  as = pwitSym s as
+    go (s :$ a) as = go s (a :* as)
 
 
 
@@ -215,12 +223,13 @@ instance Witness Show t t => Show (Dynamic t)
 class    Any a
 instance Any a
 
-instance ShowClass Any      where showClass _ = "Any"
-instance ShowClass Eq       where showClass _ = "Eq"
-instance ShowClass Ord      where showClass _ = "Ord"
-instance ShowClass Show     where showClass _ = "Show"
-instance ShowClass Num      where showClass _ = "Num"
-instance ShowClass Integral where showClass _ = "Integral"
+instance ShowClass Any          where showClass _ = "Any"
+instance ShowClass Eq           where showClass _ = "Eq"
+instance ShowClass Ord          where showClass _ = "Ord"
+instance ShowClass Show         where showClass _ = "Show"
+instance ShowClass Num          where showClass _ = "Num"
+instance ShowClass Integral     where showClass _ = "Integral"
+instance ShowClass (Typeable t) where showClass _ = "Typeable ..."
 
 -- | Witness a 'Typeable' constraint for a reified type
 witTypeable :: Witness (Typeable t) t t => TypeRep t a -> Dict (Typeable t a)
