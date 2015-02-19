@@ -68,6 +68,7 @@ instance TypeEq t t => TypeEq (AST t) t
   where
     typeEqSym (Sym t1, as1)   (Sym t2, as2)   = typeEqSym (t1,as1) (t2,as2)
     typeEqSym (s1 :$ a1, as1) (s2 :$ a2, as2) = typeEqSym (s1, a1 :* as1) (s2, a2 :* as2)
+    typeEqSym _ _ = throwError ""
 
 instance TypeEq Empty t
   where
