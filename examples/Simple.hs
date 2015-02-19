@@ -8,7 +8,7 @@ hlist :: [Dynamic MyUniverse]
 hlist = [toDyn True, toDyn (1 :: Int)]
   -- Prints: [True,1]
 
-addDyn :: (TypeEq ts ts, Render ts, PWitness Num ts ts) =>
+addDyn :: (TypeEq ts ts, PWitness Num ts ts) =>
     Dynamic ts -> Dynamic ts -> Either String (Dynamic ts)
 addDyn (Dyn ta a) (Dyn tb b) = do
     Dict <- typeEq ta tb

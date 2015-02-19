@@ -51,12 +51,14 @@ typeRep :: Typeable t a => TypeRep t a
 typeRep = TypeRep typeRep'
 
 -- | Equality on type representations
-class TypeEq t u
+class Render t => TypeEq t u
   where
     typeEqSym
         :: (t sig1, Args (AST u) sig1)
         -> (t sig2, Args (AST u) sig2)
         -> Either String (Dict (DenResult sig1 ~ DenResult sig2))
+  -- The reason to have `Render` as a super class is not to leak unnecessary Syntactic stuff in the
+  -- type of `typeEq`.
 
 instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
   where
@@ -64,24 +66,23 @@ instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
     typeEqSym (InjR t1, as1) (InjR t2, as2) = typeEqSym (t1,as1) (t2,as2)
     typeEqSym _ _ = throwError ""
 
-instance TypeEq t t => TypeEq (AST t) t
-  where
-    typeEqSym (Sym t1, as1)   (Sym t2, as2)   = typeEqSym (t1,as1) (t2,as2)
-    typeEqSym (s1 :$ a1, as1) (s2 :$ a2, as2) = typeEqSym (s1, a1 :* as1) (s2, a2 :* as2)
-    typeEqSym _ _ = throwError ""
-
 instance TypeEq Empty t
   where
     typeEqSym = error "typeEqSym: Empty"
 
 -- | Equality on type representations
-typeEq :: forall t m a b . (TypeEq t t, Render t, MonadError String m) =>
-    TypeRep t a -> TypeRep t b -> m (Dict (a ~ b))
-typeEq t1@(TypeRep s1) t2@(TypeRep s2) =
-    case typeEqSym (s1, Nil :: Args (AST t) (Full a)) (s2, Nil) of
-      Left _     -> throwError $ "type mismatch: " ++ show t1 ++ " /= " ++ show t2
-      Right Dict -> return Dict
-
+typeEq :: (TypeEq t t, MonadError String m) => TypeRep t a -> TypeRep t b -> m (Dict (a ~ b))
+typeEq t1@(TypeRep s1) t2@(TypeRep s2) = case go (s1, Nil) (s2, Nil) of
+    Left _     -> throwError $ "type mismatch: " ++ show t1 ++ " /= " ++ show t2
+    Right Dict -> return Dict
+  where
+    go :: TypeEq t t
+      => (AST t sig1, Args (AST t) sig1)
+      -> (AST t sig2, Args (AST t) sig2)
+      -> Either String (Dict ((DenResult sig1 ~ DenResult sig2)))
+    go (Sym t1, as1)   (Sym t2, as2)   = typeEqSym (t1,as1) (t2,as2)
+    go (s1 :$ a1, as1) (s2 :$ a2, as2) = go (s1, a1 :* as1) (s2, a2 :* as2)
+    go _ _ = throwError ""
 
 -- | Type constructor matching. This function makes it possible to match on type representations
 -- without dealing with the underlying 'AST' representation.
@@ -160,14 +161,14 @@ pwit _ (TypeRep a) = pwitSym a (Nil :: Args (AST t) (Full a))
 ----------------------------------------------------------------------------------------------------
 
 -- | Safe cast (does not use @unsafeCoerce@)
-cast :: forall t a b . (Typeable t a, Typeable t b, TypeEq t t, Render t) =>
+cast :: forall t a b . (Typeable t a, Typeable t b, TypeEq t t) =>
     Proxy t -> a -> Either String b
 cast _ a = do
     Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
     return a
 
 -- | Safe generalized cast (does not use @unsafeCoerce@)
-gcast :: forall t a b c . (Typeable t a, Typeable t b, TypeEq t t, Render t) =>
+gcast :: forall t a b c . (Typeable t a, Typeable t b, TypeEq t t) =>
     Proxy t -> c a -> Either String (c b)
 gcast _ a = do
     Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
@@ -181,12 +182,12 @@ data Dynamic t
 toDyn :: Typeable t a => a -> Dynamic t
 toDyn = Dyn typeRep
 
-fromDyn :: forall t a . (Typeable t a, TypeEq t t, Render t) => Dynamic t -> Either String a
+fromDyn :: forall t a . (Typeable t a, TypeEq t t) => Dynamic t -> Either String a
 fromDyn (Dyn t a) = do
     Dict <- typeEq t (typeRep :: TypeRep t a)
     return a
 
-instance (TypeEq t t, Witness Eq t t, Render t) => Eq (Dynamic t)
+instance (TypeEq t t, Witness Eq t t) => Eq (Dynamic t)
   where
     Dyn ta a == Dyn tb b
         | Right Dict <- typeEq ta tb
@@ -309,13 +310,13 @@ instance TypeEq CharType  t where typeEqSym (CharType, Nil)  (CharType, Nil)  = 
 instance TypeEq IntType   t where typeEqSym (IntType, Nil)   (IntType, Nil)   = return Dict
 instance TypeEq FloatType t where typeEqSym (FloatType, Nil) (FloatType, Nil) = return Dict
 
-instance (TypeEq t t, Render t) => TypeEq ListType t
+instance TypeEq t t => TypeEq ListType t
   where
     typeEqSym (ListType, a :* Nil) (ListType, b :* Nil) = do
         Dict <- typeEq (TypeRep a) (TypeRep b)
         return Dict
 
-instance (TypeEq t t, Render t) => TypeEq FunType t
+instance TypeEq t t => TypeEq FunType t
   where
     typeEqSym (FunType, a1 :* b1 :* Nil) (FunType, a2 :* b2 :* Nil) = do
         Dict <- typeEq (TypeRep a1) (TypeRep a2)
