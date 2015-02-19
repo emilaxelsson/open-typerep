@@ -8,7 +8,7 @@ module Data.TypeRep.Internal where
 
 import Control.Monad.Error
 
-import Data.Constraint (Dict (..))
+import Data.Constraint (Constraint, Dict (..))
 import Data.Proxy (Proxy (..))
 
 import Data.Syntactic
@@ -110,6 +110,12 @@ matchCon = simpleMatch (\_ -> foldrArgs (\t -> (E (TypeRep t) :)) []) . unTypeRe
 matchConM :: Monad m => TypeRep t c -> m [E (TypeRep t)]
 matchConM = return . matchCon
 
+-- | Show the name of type classes
+class ShowClass (p :: * -> Constraint)
+  where
+    -- | Show the name of a type class
+    showClass :: Proxy p -> String
+
 -- | Witness a type constraint for a reified type
 class Witness p t u
   where
@@ -208,6 +214,13 @@ instance Witness Show t t => Show (Dynamic t)
 -- | The universal class
 class    Any a
 instance Any a
+
+instance ShowClass Any      where showClass _ = "Any"
+instance ShowClass Eq       where showClass _ = "Eq"
+instance ShowClass Ord      where showClass _ = "Ord"
+instance ShowClass Show     where showClass _ = "Show"
+instance ShowClass Num      where showClass _ = "Num"
+instance ShowClass Integral where showClass _ = "Integral"
 
 -- | Witness a 'Typeable' constraint for a reified type
 witTypeable :: Witness (Typeable t) t t => TypeRep t a -> Dict (Typeable t a)
