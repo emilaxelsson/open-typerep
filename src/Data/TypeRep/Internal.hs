@@ -6,6 +6,8 @@ module Data.TypeRep.Internal where
 
 
 
+import Control.Monad.Error
+
 import Data.Constraint (Dict (..))
 import Data.Proxy (Proxy (..))
 
@@ -54,13 +56,13 @@ class TypeEq t u
     typeEqSym
         :: (t sig1, Args (AST u) sig1)
         -> (t sig2, Args (AST u) sig2)
-        -> Maybe (Dict (DenResult sig1 ~ DenResult sig2))
+        -> Either String (Dict (DenResult sig1 ~ DenResult sig2))
 
 instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
   where
     typeEqSym (InjL t1, as1) (InjL t2, as2) = typeEqSym (t1,as1) (t2,as2)
     typeEqSym (InjR t1, as1) (InjR t2, as2) = typeEqSym (t1,as1) (t2,as2)
-    typeEqSym _ _ = Nothing
+    typeEqSym _ _ = throwError ""
 
 instance TypeEq t t => TypeEq (AST t) t
   where
@@ -72,8 +74,13 @@ instance TypeEq Empty t
     typeEqSym = error "typeEqSym: Empty"
 
 -- | Equality on type representations
-typeEq :: forall t a b . TypeEq t t => TypeRep t a -> TypeRep t b -> Maybe (Dict (a ~ b))
-typeEq (TypeRep s1) (TypeRep s2) = typeEqSym (s1, Nil :: Args (AST t) (Full a)) (s2, Nil)
+typeEq :: forall t m a b . (TypeEq t t, Render t, MonadError String m) =>
+    TypeRep t a -> TypeRep t b -> m (Dict (a ~ b))
+typeEq t1@(TypeRep s1) t2@(TypeRep s2) =
+    case typeEqSym (s1, Nil :: Args (AST t) (Full a)) (s2, Nil) of
+      Left _     -> throwError $ "type mismatch: " ++ show t1 ++ " /= " ++ show t2
+      Right Dict -> return Dict
+
 
 -- | Type constructor matching. This function makes it possible to match on type representations
 -- without dealing with the underlying 'AST' representation.
@@ -119,8 +126,8 @@ instance Witness p t t => Witness p (AST t) t
 -- | Partially witness a type constraint for a reified type
 class PWitness p t u
   where
-    pwitSym :: t sig -> Args (AST u) sig -> Maybe (Dict (p (DenResult sig)))
-    pwitSym _ _ = Nothing
+    pwitSym :: t sig -> Args (AST u) sig -> Either String (Dict (p (DenResult sig)))
+    pwitSym _ _ = throwError ""
 
 instance (PWitness p t1 t, PWitness p t2 t) => PWitness p (t1 :+: t2) t
   where
@@ -133,15 +140,16 @@ instance PWitness p t t => PWitness p (AST t) t
     pwitSym (s :$ a) as = pwitSym s (a :* as)
 
 -- | Default implementation of 'pwitSym' for types that have a 'Witness' instance
-pwitSymDefault :: Witness p t u => t sig -> Args (AST u) sig -> Maybe (Dict (p (DenResult sig)))
-pwitSymDefault t = Just . witSym t
+pwitSymDefault :: Witness p t u =>
+    t sig -> Args (AST u) sig -> Either String (Dict (p (DenResult sig)))
+pwitSymDefault t = return . witSym t
 
 -- | Witness a type constraint for a reified type
 wit :: forall p t a . Witness p t t => Proxy p -> TypeRep t a -> Dict (p a)
 wit _ (TypeRep a) = witSym a (Nil :: Args (AST t) (Full a))
 
 -- | Partially witness a type constraint for a reified type
-pwit :: forall p t a . PWitness p t t => Proxy p -> TypeRep t a -> Maybe (Dict (p a))
+pwit :: forall p t a . PWitness p t t => Proxy p -> TypeRep t a -> Either String (Dict (p a))
 pwit _ (TypeRep a) = pwitSym a (Nil :: Args (AST t) (Full a))
 
 
@@ -151,13 +159,15 @@ pwit _ (TypeRep a) = pwitSym a (Nil :: Args (AST t) (Full a))
 ----------------------------------------------------------------------------------------------------
 
 -- | Safe cast (does not use @unsafeCoerce@)
-cast :: forall t a b . (Typeable t a, Typeable t b, TypeEq t t) => Proxy t -> a -> Maybe b
+cast :: forall t a b . (Typeable t a, Typeable t b, TypeEq t t, Render t) =>
+    Proxy t -> a -> Either String b
 cast _ a = do
     Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
     return a
 
 -- | Safe generalized cast (does not use @unsafeCoerce@)
-gcast :: forall t a b c . (Typeable t a, Typeable t b, TypeEq t t) => Proxy t -> c a -> Maybe (c b)
+gcast :: forall t a b c . (Typeable t a, Typeable t b, TypeEq t t, Render t) =>
+    Proxy t -> c a -> Either String (c b)
 gcast _ a = do
     Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
     return a
@@ -170,16 +180,16 @@ data Dynamic t
 toDyn :: Typeable t a => a -> Dynamic t
 toDyn = Dyn typeRep
 
-fromDyn :: forall t a . (Typeable t a, TypeEq t t) => Dynamic t -> Maybe a
+fromDyn :: forall t a . (Typeable t a, TypeEq t t, Render t) => Dynamic t -> Either String a
 fromDyn (Dyn t a) = do
     Dict <- typeEq t (typeRep :: TypeRep t a)
     return a
 
-instance (TypeEq t t, Witness Eq t t) => Eq (Dynamic t)
+instance (TypeEq t t, Witness Eq t t, Render t) => Eq (Dynamic t)
   where
     Dyn ta a == Dyn tb b
-        | Just Dict <- typeEq ta tb
-        , Dict      <- wit pEq ta
+        | Right Dict <- typeEq ta tb
+        , Dict       <- wit pEq ta
         = a == b
     _ == _ = False
 
@@ -202,7 +212,7 @@ witTypeable :: Witness (Typeable t) t t => TypeRep t a -> Dict (Typeable t a)
 witTypeable = wit Proxy
 
 -- | Partially witness a 'Typeable' constraint for a reified type
-pwitTypeable :: PWitness (Typeable t) t t => TypeRep t a -> Maybe (Dict (Typeable t a))
+pwitTypeable :: PWitness (Typeable t) t t => TypeRep t a -> Either String (Dict (Typeable t a))
 pwitTypeable = pwit Proxy
 
 pAny :: Proxy Any
@@ -293,18 +303,18 @@ instance (FloatType :<: t)                             => Typeable t Float    wh
 instance (ListType  :<: t, Typeable t a)               => Typeable t [a]      where typeRep' = listType typeRep'
 instance (FunType   :<: t, Typeable t a, Typeable t b) => Typeable t (a -> b) where typeRep' = funType typeRep' typeRep'
 
-instance TypeEq BoolType  t where typeEqSym (BoolType, Nil)  (BoolType, Nil)  = Just Dict
-instance TypeEq CharType  t where typeEqSym (CharType, Nil)  (CharType, Nil)  = Just Dict
-instance TypeEq IntType   t where typeEqSym (IntType, Nil)   (IntType, Nil)   = Just Dict
-instance TypeEq FloatType t where typeEqSym (FloatType, Nil) (FloatType, Nil) = Just Dict
+instance TypeEq BoolType  t where typeEqSym (BoolType, Nil)  (BoolType, Nil)  = return Dict
+instance TypeEq CharType  t where typeEqSym (CharType, Nil)  (CharType, Nil)  = return Dict
+instance TypeEq IntType   t where typeEqSym (IntType, Nil)   (IntType, Nil)   = return Dict
+instance TypeEq FloatType t where typeEqSym (FloatType, Nil) (FloatType, Nil) = return Dict
 
-instance TypeEq t t => TypeEq ListType t
+instance (TypeEq t t, Render t) => TypeEq ListType t
   where
     typeEqSym (ListType, a :* Nil) (ListType, b :* Nil) = do
         Dict <- typeEq (TypeRep a) (TypeRep b)
         return Dict
 
-instance TypeEq t t => TypeEq FunType t
+instance (TypeEq t t, Render t) => TypeEq FunType t
   where
     typeEqSym (FunType, a1 :* b1 :* Nil) (FunType, a2 :* b2 :* Nil) = do
         Dict <- typeEq (TypeRep a1) (TypeRep a2)
@@ -342,12 +352,12 @@ instance Witness Any FloatType t where witSym _ _ = Dict
 instance Witness Any ListType  t where witSym _ _ = Dict
 instance Witness Any FunType   t where witSym _ _ = Dict
 
-instance PWitness Any BoolType  t where pwitSym _ _ = Just Dict
-instance PWitness Any CharType  t where pwitSym _ _ = Just Dict
-instance PWitness Any IntType   t where pwitSym _ _ = Just Dict
-instance PWitness Any FloatType t where pwitSym _ _ = Just Dict
-instance PWitness Any ListType  t where pwitSym _ _ = Just Dict
-instance PWitness Any FunType   t where pwitSym _ _ = Just Dict
+instance PWitness Any BoolType  t where pwitSym _ _ = return Dict
+instance PWitness Any CharType  t where pwitSym _ _ = return Dict
+instance PWitness Any IntType   t where pwitSym _ _ = return Dict
+instance PWitness Any FloatType t where pwitSym _ _ = return Dict
+instance PWitness Any ListType  t where pwitSym _ _ = return Dict
+instance PWitness Any FunType   t where pwitSym _ _ = return Dict
 
 instance                   Witness Eq BoolType  t where witSym BoolType  Nil = Dict
 instance                   Witness Eq CharType  t where witSym CharType  Nil = Dict
@@ -407,8 +417,8 @@ instance PWitness Integral FloatType t
 instance PWitness Integral ListType  t
 instance PWitness Integral FunType   t
 
-dynToInteger :: PWitness Integral t t => Dynamic t -> Maybe Integer
-dynToInteger (Dyn tr a)
-    | Just Dict <- pwit pIntegral tr = Just (toInteger a)
-dynToInteger _ = Nothing
+dynToInteger :: PWitness Integral t t => Dynamic t -> Either String Integer
+dynToInteger (Dyn tr a) = do
+    Dict <- pwit pIntegral tr
+    return (toInteger a)
 

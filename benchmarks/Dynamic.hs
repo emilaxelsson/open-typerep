@@ -25,10 +25,10 @@ dynListBase :: Int -> [Base.Dynamic]
 dynListBase n = concat [[Base.toDyn i, Base.toDyn (even i)] | i <- [0..n]]
 
 dynSum :: [Dynamic Types] -> Int
-dynSum ds = sum [i | d <- ds, Just i <- [fromDyn d]]
+dynSum ds = sum [i | d <- ds, Right i <- [fromDyn d]]
 
 dynSum2 :: [Dynamic Types2] -> Int
-dynSum2 ds = sum [i | d <- ds, Just i <- [fromDyn d]]
+dynSum2 ds = sum [i | d <- ds, Right i <- [fromDyn d]]
 
 dynSumBase :: [Base.Dynamic] -> Int
 dynSumBase ds = sum [i | d <- ds, Just i <- [Base.fromDynamic d]]

@@ -55,7 +55,7 @@ module Data.TypeRep
 import Data.Constraint (Dict (..))
 import Data.Proxy (Proxy (..))
 
-import Data.Syntactic ((:+:), Project (..), (:<:) (..), E (..))
+import Data.Syntactic ((:+:), Project (..), (:<:) (..), E (..), Render (..))
 
 import Data.TypeRep.Internal
 import Data.TypeRep.Sub

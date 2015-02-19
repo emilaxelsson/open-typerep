@@ -8,11 +8,13 @@ hlist :: [Dynamic MyUniverse]
 hlist = [toDyn True, toDyn (1 :: Int)]
   -- Prints: [True,1]
 
-addDyn :: (TypeEq ts ts, PWitness Num ts ts) => Dynamic ts -> Dynamic ts -> Maybe (Dynamic ts)
+addDyn :: (TypeEq ts ts, Render ts, PWitness Num ts ts) =>
+    Dynamic ts -> Dynamic ts -> Either String (Dynamic ts)
 addDyn (Dyn ta a) (Dyn tb b) = do
     Dict <- typeEq ta tb
     Dict <- pwit pNum ta
     return (Dyn ta (a+b))
+
 
 
 test1 = toDyn (1 :: Int) `addDyn` toDyn (2 :: Int)
@@ -24,5 +26,5 @@ main = do
     putStrLn "All tests passed"
   where
     t1 = show hlist == "[True,1]"
-    t2 = show (test1 :: Maybe (Dynamic MyUniverse)) == "Just 3"
+    t2 = show (test1 :: Either String (Dynamic MyUniverse)) == "Right 3"
 

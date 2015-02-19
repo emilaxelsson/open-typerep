@@ -61,6 +61,7 @@ library
   build-depends:
     base        >=4 && <5,
     constraints >=0.3,
+    mtl         >=2.1,
     syntactic   >=2.0,
     tagged      >=0.4
 
