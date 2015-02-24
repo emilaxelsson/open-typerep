@@ -45,13 +45,14 @@ testDynBase = dynSumBase . dynListBase
 main :: IO ()
 main = defaultMainWith (defaultConfig {csvFile = Just "bench-results/dynamic.csv"})
     [ bgroup "size=1000"
-       [ bench "testDyn"     $ nf testDyn     1000
-       , bench "testDyn2"    $ nf testDyn2    1000
-       , bench "testDynBase" $ nf testDynBase 1000
-       ]
+        [ bench "testDyn"     $ nf testDyn     1000
+        , bench "testDyn2"    $ nf testDyn2    1000
+        , bench "testDynBase" $ nf testDynBase 1000
+        ]
     , bgroup "size=2000"
-       [ bench "testDyn"     $ nf testDyn     2000
-       , bench "testDyn2"    $ nf testDyn2    2000
-       , bench "testDynBase" $ nf testDynBase 2000
-       ]
+        [ bench "testDyn"     $ nf testDyn     2000
+        , bench "testDyn2"    $ nf testDyn2    2000
+        , bench "testDynBase" $ nf testDynBase 2000
+        ]
     ]
+
