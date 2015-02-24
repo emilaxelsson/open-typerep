@@ -52,10 +52,30 @@ instance (VarArg t1, VarArg t2) => VarArg (t1 :+: t2)
     fromResInvSym (InjL t) = fromResInvSym t
     fromResInvSym (InjR t) = fromResInvSym t
 
+instance VarArg BoolType
+  where
+    aritySym BoolType Nil      = FunRes
+    fromResInvSym BoolType Nil = Dict
+
+instance VarArg CharType
+  where
+    aritySym CharType Nil      = FunRes
+    fromResInvSym CharType Nil = Dict
+
 instance VarArg IntType
   where
     aritySym IntType Nil      = FunRes
     fromResInvSym IntType Nil = Dict
+
+instance VarArg FloatType
+  where
+    aritySym FloatType Nil      = FunRes
+    fromResInvSym FloatType Nil = Dict
+
+instance VarArg ListType
+  where
+    aritySym ListType _      = FunRes
+    fromResInvSym ListType _ = Dict
 
 instance VarArg FunType
   where
