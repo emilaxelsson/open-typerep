@@ -119,12 +119,23 @@ type family FunM m a where
 
 -- | Lift a function to a similar function with monadic result type
 --
--- > liftMonadic f = \a b ... x -> return (f a b ... x)
+-- > liftMonadic _ _ f = \a b ... x -> return (f a b ... x)
 liftMonadic :: forall t a m . (VarArg t, Monad m) => Proxy m -> TypeRep t a -> a -> FunM m (ToRes a)
 liftMonadic _ t f | Dict <- fromResInv t = go (arity t) f
   where
     go :: (FromRes (ToRes b) ~ b) => Arity (ToRes b) -> b -> FunM m (ToRes b)
     go FunRes     a = return a
+    go (FunArg b) f = \a -> go b (f a)
+
+-- | Run the result of a monadic function
+--
+-- > runMonadic run _ f = \a b ... x -> run (f a b ... x)
+runMonadic :: forall t a m . VarArg t =>
+    (forall a . m a -> a) -> TypeRep t a -> FunM m (ToRes a) -> a
+runMonadic run t f | Dict <- fromResInv t = go (arity t) f
+  where
+    go :: (FromRes (ToRes b) ~ b) => Arity (ToRes b) -> FunM m (ToRes b) -> b
+    go FunRes a     = run a
     go (FunArg b) f = \a -> go b (f a)
 
 -- | Give a function monadic arguments and result type. @(`FunM2` m)@ will normally be indexed by

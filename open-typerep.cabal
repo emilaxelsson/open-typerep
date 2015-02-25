@@ -74,6 +74,7 @@ library
     FlexibleInstances
     GADTs
     MultiParamTypeClasses
+    Rank2Types
     ScopedTypeVariables
     TypeFamilies
     TypeOperators
