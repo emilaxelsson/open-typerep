@@ -138,6 +138,17 @@ runMonadic run t f | Dict <- fromResInv t = go (arity t) f
     go FunRes a     = run a
     go (FunArg b) f = \a -> go b (f a)
 
+-- | Compose a function with an N-ary monadic function
+--
+-- > compMonadic f _ g = \a b ... x -> f (g a b ... x)
+compMonadic :: forall t a m1 m2 . VarArg t =>
+    (forall a . m1 a -> m2 a) -> TypeRep t a -> FunM m1 (ToRes a) -> FunM m2 (ToRes a)
+compMonadic f t g | Dict <- fromResInv t = go (arity t) g
+  where
+    go :: (FromRes (ToRes b) ~ b) => Arity (ToRes b) -> FunM m1 (ToRes b) -> FunM m2 (ToRes b)
+    go FunRes a     = f a
+    go (FunArg b) g = \a -> go b (g a)
+
 -- | Give a function monadic arguments and result type. @(`FunM2` m)@ will normally be indexed by
 -- @(`ToRes` a)@.
 --
