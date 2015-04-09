@@ -6,7 +6,7 @@ module Data.TypeRep.Internal where
 
 
 
-import Control.Monad.Error
+import Control.Monad.Except
 import Data.Char (isAlphaNum)
 
 import Data.Constraint (Constraint, Dict (..))

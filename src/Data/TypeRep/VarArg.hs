@@ -4,7 +4,7 @@ module Data.TypeRep.VarArg where
 
 
 
-import Control.Monad.Error
+import Control.Monad.Except
 
 import Data.Syntactic
 import Data.TypeRep
