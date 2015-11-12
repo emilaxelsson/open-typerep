@@ -6,7 +6,7 @@ module Data.TypeRep.VarArg where
 
 import Control.Monad.Except
 
-import Data.Syntactic
+import Language.Syntactic
 import Data.TypeRep
 import Data.TypeRep.Internal
 

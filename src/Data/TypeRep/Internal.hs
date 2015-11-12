@@ -12,7 +12,7 @@ import Data.Char (isAlphaNum)
 import Data.Constraint (Constraint, Dict (..))
 import Data.Proxy (Proxy (..))
 
-import Data.Syntactic
+import Language.Syntactic
 
 
 

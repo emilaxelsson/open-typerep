@@ -4,7 +4,7 @@ module Data.TypeRep
     ( -- * Helper types
       module Data.Constraint
     , module Data.Proxy
-    , module Data.Syntactic
+    , module Language.Syntactic
       -- * Type representations
     , Typeable
     , TypeRep
@@ -55,7 +55,7 @@ module Data.TypeRep
 import Data.Constraint (Dict (..))
 import Data.Proxy (Proxy (..))
 
-import Data.Syntactic ((:+:), Project (..), (:<:) (..), E (..))
+import Language.Syntactic ((:+:), Project (..), (:<:) (..), E (..))
 
 import Data.TypeRep.Internal
 import Data.TypeRep.Sub

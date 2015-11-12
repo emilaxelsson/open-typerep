@@ -19,7 +19,7 @@ module Data.TypeRep.Sub where
 
 
 
-import Data.Syntactic
+import Language.Syntactic
 
 import Data.TypeRep.Internal
 
