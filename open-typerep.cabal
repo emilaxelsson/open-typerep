@@ -52,6 +52,7 @@ library
 
   exposed-modules:
     Data.TypeRep.Representation
+    Data.TypeRep.Types
     Data.TypeRep
     Data.TypeRep.VarArg
 
