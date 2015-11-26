@@ -51,7 +51,7 @@ library
   hs-source-dirs: src
 
   exposed-modules:
-    Data.TypeRep.Internal
+    Data.TypeRep.Representation
     Data.TypeRep
     Data.TypeRep.VarArg
 

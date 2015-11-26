@@ -8,7 +8,7 @@ import Control.Monad.Except
 
 import Language.Syntactic
 import Data.TypeRep
-import Data.TypeRep.Internal
+import Data.TypeRep.Representation
 
 
 

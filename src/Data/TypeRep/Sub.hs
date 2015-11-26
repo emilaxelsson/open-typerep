@@ -15,13 +15,13 @@
 
 module Data.TypeRep.Sub where
 
--- TODO Merge this module with `Data.TypeRep.Internal` when support for < 7.10 is dropped
+-- TODO Merge this module with `Data.TypeRep.Representation` when support for < 7.10 is dropped
 
 
 
 import Language.Syntactic
 
-import Data.TypeRep.Internal
+import Data.TypeRep.Representation
 
 
 

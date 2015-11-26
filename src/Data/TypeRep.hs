@@ -57,6 +57,6 @@ import Data.Proxy (Proxy (..))
 
 import Language.Syntactic ((:+:), Project (..), (:<:) (..), E (..))
 
-import Data.TypeRep.Internal
+import Data.TypeRep.Representation
 import Data.TypeRep.Sub
 

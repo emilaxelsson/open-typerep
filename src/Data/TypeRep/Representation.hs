@@ -2,7 +2,7 @@
 
 -- | Open type representations and dynamic types
 
-module Data.TypeRep.Internal where
+module Data.TypeRep.Representation where
 
 
 
