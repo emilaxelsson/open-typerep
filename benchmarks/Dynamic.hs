@@ -5,6 +5,8 @@ import Criterion.Types
 import Data.Monoid
 
 import Data.TypeRep
+import Data.TypeRep.Types
+import Data.TypeRep.TypeableInstances ()
 
 import qualified Data.Dynamic as Base  -- For comparison
 

@@ -65,7 +65,7 @@ instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
   where
     typeEqSym (InjL t1, as1) (InjL t2, as2) = typeEqSym (t1,as1) (t2,as2)
     typeEqSym (InjR t1, as1) (InjR t2, as2) = typeEqSym (t1,as1) (t2,as2)
-    typeEqSym _ _ = throwError ""
+    typeEqSym (t1,_) (t2,_) = throwError ""
 
 instance TypeEq Empty t
   where
@@ -168,6 +168,15 @@ pwit p t@(TypeRep a) = case go a Nil of
     go (Sym s)  as = pwitSym s as
     go (s :$ a) as = go s (a :* as)
 
+-- | Witness a 'Typeable' constraint for a reified type
+witTypeable :: Witness (Typeable t) t t => TypeRep t a -> Dict (Typeable t a)
+witTypeable = wit Proxy
+
+-- | Partially witness a 'Typeable' constraint for a reified type
+pwitTypeable :: PWitness (Typeable t) t t =>
+    TypeRep t a -> Either String (Dict (Typeable t a))
+pwitTypeable = pwit Proxy
+
 
 
 ----------------------------------------------------------------------------------------------------
@@ -212,4 +221,14 @@ instance (TypeEq t t, Witness Eq t t) => Eq (Dynamic t)
 instance Witness Show t t => Show (Dynamic t)
   where
     show (Dyn t a) | Dict <- wit (Proxy :: Proxy Show) t = show a
+
+
+
+----------------------------------------------------------------------------------------------------
+-- * Misc.
+----------------------------------------------------------------------------------------------------
+
+-- | The universal class
+class    Any a
+instance Any a
 

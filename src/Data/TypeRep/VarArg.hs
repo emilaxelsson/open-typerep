@@ -55,33 +55,33 @@ instance (VarArg t1, VarArg t2) => VarArg (t1 :+: t2)
 
 instance VarArg BoolType
   where
-    aritySym BoolType Nil      = FunRes
-    fromResInvSym BoolType Nil = Dict
+    aritySym Bool_t Nil      = FunRes
+    fromResInvSym Bool_t Nil = Dict
 
 instance VarArg CharType
   where
-    aritySym CharType Nil      = FunRes
-    fromResInvSym CharType Nil = Dict
+    aritySym Char_t Nil      = FunRes
+    fromResInvSym Char_t Nil = Dict
 
 instance VarArg IntType
   where
-    aritySym IntType Nil      = FunRes
-    fromResInvSym IntType Nil = Dict
+    aritySym Int_t Nil      = FunRes
+    fromResInvSym Int_t Nil = Dict
 
 instance VarArg FloatType
   where
-    aritySym FloatType Nil      = FunRes
-    fromResInvSym FloatType Nil = Dict
+    aritySym Float_t Nil      = FunRes
+    fromResInvSym Float_t Nil = Dict
 
 instance VarArg ListType
   where
-    aritySym ListType _      = FunRes
-    fromResInvSym ListType _ = Dict
+    aritySym List_t _      = FunRes
+    fromResInvSym List_t _ = Dict
 
 instance VarArg FunType
   where
-    aritySym FunType (_ :* b :* Nil) = FunArg $ arity $ TypeRep b
-    fromResInvSym FunType (_ :* b :* Nil)
+    aritySym Fun_t (_ :* b :* Nil) = FunArg $ arity $ TypeRep b
+    fromResInvSym Fun_t (_ :* b :* Nil)
         | Dict <- fromResInv $ TypeRep b = Dict
 
 -- | Get the 'Arity' of a type. The purpose is to be able to distinguish between functions and

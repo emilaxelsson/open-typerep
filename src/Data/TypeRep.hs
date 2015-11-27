@@ -23,29 +23,10 @@ module Data.TypeRep
     , Dynamic (..)
     , toDyn
     , fromDyn
-    , dynToInteger
       -- * Type class witnessing
     , Any
     , witTypeable
     , pwitTypeable
-    , pAny
-    , pEq
-    , pOrd
-    , pShow
-    , pNum
-    , pIntegral
-    , BoolType
-    , CharType
-    , IntType
-    , FloatType
-    , ListType
-    , FunType
-    , boolType
-    , charType
-    , intType
-    , floatType
-    , listType
-    , funType
       -- * Sub-universes
     , module Data.TypeRep.Sub
     ) where
@@ -58,6 +39,5 @@ import Data.Proxy (Proxy (..))
 import Language.Syntactic ((:+:), Project (..), (:<:) (..), E (..))
 
 import Data.TypeRep.Representation
-import Data.TypeRep.Types
 import Data.TypeRep.Sub
 

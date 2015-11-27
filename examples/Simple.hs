@@ -1,6 +1,8 @@
 import Control.Monad
 
 import Data.TypeRep
+import Data.TypeRep.Types
+import Data.TypeRep.TypeableInstances ()
 
 type MyUniverse = IntType :+: BoolType
 
