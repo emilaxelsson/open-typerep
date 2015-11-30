@@ -11,48 +11,11 @@ module Data.TypeRep.Types.Basic where
 
 
 import Data.Constraint (Dict (..))
-import Data.Proxy (Proxy (..))
 
 import Language.Syntactic
 
 import Data.TypeRep.Representation
 import Data.TypeRep.TH
-
-
-
-instance ShowClass Any          where showClass _ = "Any"
-instance ShowClass Eq           where showClass _ = "Eq"
-instance ShowClass Ord          where showClass _ = "Ord"
-instance ShowClass Show         where showClass _ = "Show"
-instance ShowClass Num          where showClass _ = "Num"
-instance ShowClass Integral     where showClass _ = "Integral"
-instance ShowClass (Typeable t) where showClass _ = "Typeable ..."
-
-
-
---------------------------------------------------------------------------------
--- * Class proxies
---------------------------------------------------------------------------------
-
--- These can be passed to 'wit' and 'pwit'
-
-pAny :: Proxy Any
-pAny = Proxy
-
-pEq :: Proxy Eq
-pEq = Proxy
-
-pOrd :: Proxy Ord
-pOrd = Proxy
-
-pShow :: Proxy Show
-pShow = Proxy
-
-pNum :: Proxy Num
-pNum = Proxy
-
-pIntegral :: Proxy Integral
-pIntegral = Proxy
 
 
 

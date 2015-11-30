@@ -111,12 +111,6 @@ matchCon = simpleMatch (\_ -> foldrArgs (\t -> (E (TypeRep t) :)) []) . unTypeRe
 matchConM :: Monad m => TypeRep t c -> m [E (TypeRep t)]
 matchConM = return . matchCon
 
--- | Show the name of type classes
-class ShowClass (p :: * -> Constraint)
-  where
-    -- | Show the name of a type class
-    showClass :: Proxy p -> String
-
 -- | Witness a type constraint for a reified type
 class Witness p t u
   where
@@ -231,4 +225,42 @@ instance Witness Show t t => Show (Dynamic t)
 -- | The universal class
 class    Any a
 instance Any a
+
+-- | Show the name of type classes
+class ShowClass (p :: * -> Constraint)
+  where
+    -- | Show the name of a type class
+    showClass :: Proxy p -> String
+
+instance ShowClass Any          where showClass _ = "Any"
+instance ShowClass Eq           where showClass _ = "Eq"
+instance ShowClass Ord          where showClass _ = "Ord"
+instance ShowClass Show         where showClass _ = "Show"
+instance ShowClass Num          where showClass _ = "Num"
+instance ShowClass Integral     where showClass _ = "Integral"
+instance ShowClass (Typeable t) where showClass _ = "Typeable ..."
+
+-- | Proxy of 'Any' class. Can be passed to 'wit' and 'pwit'.
+pAny :: Proxy Any
+pAny = Proxy
+
+-- | Proxy of 'Eq' class. Can be passed to 'wit' and 'pwit'.
+pEq :: Proxy Eq
+pEq = Proxy
+
+-- | Proxy of 'Ord' class. Can be passed to 'wit' and 'pwit'.
+pOrd :: Proxy Ord
+pOrd = Proxy
+
+-- | Proxy of 'Show' class. Can be passed to 'wit' and 'pwit'.
+pShow :: Proxy Show
+pShow = Proxy
+
+-- | Proxy of 'Num' class. Can be passed to 'wit' and 'pwit'.
+pNum :: Proxy Num
+pNum = Proxy
+
+-- | Proxy of 'Integral' class. Can be passed to 'wit' and 'pwit'.
+pIntegral :: Proxy Integral
+pIntegral = Proxy
 

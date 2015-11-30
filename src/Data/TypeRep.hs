@@ -27,6 +27,13 @@ module Data.TypeRep
     , Any
     , witTypeable
     , pwitTypeable
+      -- * Misc.
+    , pAny
+    , pEq
+    , pOrd
+    , pShow
+    , pNum
+    , pIntegral
       -- * Sub-universes
     , module Data.TypeRep.Sub
     ) where
