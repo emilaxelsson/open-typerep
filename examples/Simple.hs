@@ -1,15 +1,21 @@
 import Control.Monad
 
+
+
 import Data.TypeRep
 import Data.TypeRep.Types
 import Data.TypeRep.TypeableInstances ()
 
-type MyUniverse = IntType :+: BoolType
 
+
+-- A universe of three types
+type MyUniverse = IntType :+: FloatType :+: BoolType
+
+-- A list with dynamically typed elements
 hlist :: [Dynamic MyUniverse]
 hlist = [toDyn True, toDyn (1 :: Int)]
-  -- Prints: [True,1]
 
+-- Dynamically typed addition for any numeric type
 addDyn :: (TypeEq ts ts, PWitness Num ts ts) =>
     Dynamic ts -> Dynamic ts -> Either String (Dynamic ts)
 addDyn (Dyn ta a) (Dyn tb b) = do
@@ -17,16 +23,16 @@ addDyn (Dyn ta a) (Dyn tb b) = do
     Dict <- pwit pNum ta
     return (Dyn ta (a+b))
 
-
-
-test1 = toDyn (1 :: Int) `addDyn` toDyn (2 :: Int)
-  -- Prints: Just 3
+test2 = toDyn (1 :: Int)   `addDyn` toDyn (2 :: Int)
+test3 = toDyn (3 :: Float) `addDyn` toDyn (4 :: Float)
 
 main = do
     unless t1 $ fail "Test 1 failed"
     unless t2 $ fail "Test 2 failed"
+    unless t3 $ fail "Test 3 failed"
     putStrLn "All tests passed"
   where
     t1 = show hlist == "[True,1]"
-    t2 = show (test1 :: Either String (Dynamic MyUniverse)) == "Right 3"
+    t2 = show (test2 :: Either String (Dynamic MyUniverse)) == "Right 3"
+    t3 = show (test3 :: Either String (Dynamic MyUniverse)) == "Right 7.0"
 
