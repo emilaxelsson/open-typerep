@@ -6,7 +6,7 @@
 -- The reason for using symbol names ending with @_t@ is that 'deriveRender'
 -- uses everything that comes before @_@ when rendering the constructor.
 
-module Data.TypeRep.Types where
+module Data.TypeRep.Types.Basic where
 
 
 

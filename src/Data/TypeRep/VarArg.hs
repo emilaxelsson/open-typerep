@@ -9,7 +9,7 @@ import Control.Monad.Except
 import Language.Syntactic
 import Data.TypeRep
 import Data.TypeRep.Representation
-import Data.TypeRep.Types
+import Data.TypeRep.Types.Basic
 
 
 

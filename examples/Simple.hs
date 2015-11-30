@@ -3,8 +3,8 @@ import Control.Monad
 
 
 import Data.TypeRep
-import Data.TypeRep.Types
-import Data.TypeRep.TypeableInstances ()
+import Data.TypeRep.Types.Basic
+import Data.TypeRep.Types.Basic.Typeable ()
 
 
 

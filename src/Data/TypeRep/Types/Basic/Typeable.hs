@@ -13,7 +13,7 @@
 --
 -- > Typeable MyTypeRep Bool
 
-module Data.TypeRep.TypeableInstances where
+module Data.TypeRep.Types.Basic.Typeable where
 
 
 
@@ -21,7 +21,7 @@ import Language.Syntactic
 
 import Data.TypeRep.Representation
 import Data.TypeRep.TH
-import Data.TypeRep.Types
+import Data.TypeRep.Types.Basic
 
 
 

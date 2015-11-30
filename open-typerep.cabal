@@ -53,8 +53,8 @@ library
   exposed-modules:
     Data.TypeRep.Representation
     Data.TypeRep.TH
-    Data.TypeRep.Types
-    Data.TypeRep.TypeableInstances
+    Data.TypeRep.Types.Basic
+    Data.TypeRep.Types.Basic.Typeable
     Data.TypeRep.VarArg
     Data.TypeRep
 
