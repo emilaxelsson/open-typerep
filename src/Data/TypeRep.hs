@@ -28,6 +28,7 @@ module Data.TypeRep
     , fromDyn
       -- * Misc.
     , Any
+    , ShowClass (..)
     , pAny
     , pDataTypeable
     , pEq
