@@ -57,6 +57,8 @@ library
     Data.TypeRep.Types.Basic.Typeable
     Data.TypeRep.Types.Tuple
     Data.TypeRep.Types.Tuple.Typeable
+    Data.TypeRep.Types.IntWord
+    Data.TypeRep.Types.IntWord.Typeable
     Data.TypeRep.VarArg
     Data.TypeRep
 
