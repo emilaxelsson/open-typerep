@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Data.TypeRep.TH
@@ -23,6 +24,33 @@ import Language.Syntactic
 import Language.Syntactic.TH
 
 import Data.TypeRep.Representation
+
+
+
+-- | Match on a 'Pred' of the form @(t1 ~ t2)@
+viewEqPred :: Pred -> Maybe (Type,Type)
+#if MIN_VERSION_template_haskell(2,10,0)
+viewEqPred (AppT (AppT EqualityT t1) t2) = Just (t1,t2)
+#else
+viewEqPred (EqualP t1 t2) = Just (t1,t2)
+#endif
+viewEqPred _ = Nothing
+  -- This function is just here to provide compatibility with
+  -- template-haskell < 2.10
+
+-- | Construct a 'Pred' of the form @(Cl t1 t2 ...)@
+mkClassPred :: Name -> [Type] -> Pred
+#if MIN_VERSION_template_haskell(2,10,0)
+mkClassPred cl ts = foldl1 AppT (ConT cl : ts)
+#else
+mkClassPred cl ts = ClassP cl ts
+#endif
+  -- This function is just here to provide compatibility with
+  -- template-haskell < 2.10
+
+tyVarName :: TyVarBndr -> Name
+tyVarName (PlainTV v)    = v  -- Only needed on GHC < 7.10
+tyVarName (KindedTV v _) = v
 
 
 
@@ -59,7 +87,7 @@ symArity
     -> Con   -- ^ Symbol
     -> Maybe Int
 symArity sigVar (ForallC _ [cxt] (NormalC _ []))
-    | AppT (AppT EqualityT (VarT sigVar')) sig <- cxt
+    | Just (VarT sigVar', sig) <- viewEqPred cxt
     , sigVar == sigVar'
     = count sig
   where
@@ -122,15 +150,16 @@ deriveTypeEq
 deriveTypeEq ty = do
     info <- reify ty
     case info of
-        TyConI (DataD _ _ [KindedTV sigVar StarT] cs _) -> do
+        TyConI (DataD _ _ [sigVarTV] cs _) -> do
             throwErrExp <- [| throwError "" |]
               -- `typeEq` will turn this into a proper error message
+            let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
                   Nothing -> errorDerive "deriveTypeEq" info
             let classCxt = if maxArity == 0
                   then []
-                  else [foldl1 AppT [ConT ''TypeEq, tVar, tVar]]
+                  else [mkClassPred ''TypeEq [tVar, tVar]]
             let typeEqSymFallThrough = if length cs > 1
                   then [Clause [WildP, WildP] (NormalB throwErrExp) []]
                   else []
@@ -178,13 +207,14 @@ deriveWitness
 deriveWitness cl ty = do
     info <- reify ty
     case info of
-        TyConI (DataD _ _ [KindedTV sigVar StarT] cs _) -> do
+        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+            let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
                   Nothing -> errorDerive "deriveWitness" info
             let classCxt = if maxArity == 0
                   then []
-                  else [foldl1 AppT [ConT ''Witness, ConT cl, tVar, tVar]]
+                  else [mkClassPred ''Witness [ConT cl, tVar, tVar]]
             let mkClause c i n a = case witSymClause sigVar c i n a of
                   Just clause -> clause
                   Nothing -> errorDerive "deriveWitness" info
@@ -217,13 +247,14 @@ derivePWitness
 derivePWitness cl ty = do
     info <- reify ty
     case info of
-        TyConI (DataD _ _ [KindedTV sigVar StarT] cs _) -> do
+        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+            let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
                   Nothing -> errorDerive "derivePWitness" info
             let classCxt = if maxArity == 0
                   then []
-                  else [foldl1 AppT [ConT ''PWitness, ConT cl, tVar, tVar]]
+                  else [mkClassPred ''PWitness [ConT cl, tVar, tVar]]
             let mkClause c i n a = case pwitSymClause sigVar c i n a of
                   Just clause -> clause
                   Nothing -> errorDerive "derivePWitness" info
@@ -294,14 +325,15 @@ deriveWitnessTypeable
 deriveWitnessTypeable ty = do
     info <- reify ty
     case info of
-        TyConI (DataD _ _ [KindedTV sigVar StarT] cs _) -> do
+        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+            let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
                   Nothing -> errorDerive "deriveWitnessTypeable" info
-            let sub = foldl1 AppT [ConT ''(:<:), ConT ty, tVar]
+            let sub = mkClassPred ''(:<:) [ConT ty, tVar]
             let classCxt = if maxArity == 0
                   then [sub]
-                  else [sub, foldl1 AppT [ConT ''Witness, AppT (ConT cl) tVar, tVar, tVar]]
+                  else [sub, mkClassPred ''Witness [AppT (ConT cl) tVar, tVar, tVar]]
             let mkClause c i n a = case witSymClause sigVar c i n a of
                   Just clause -> clause
                   Nothing -> errorDerive "deriveWitnessTypeable" info
@@ -334,14 +366,15 @@ derivePWitnessTypeable
 derivePWitnessTypeable ty = do
     info <- reify ty
     case info of
-        TyConI (DataD _ _ [KindedTV sigVar StarT] cs _) -> do
+        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+            let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
                   Nothing -> errorDerive "derivePWitnessTypeable" info
-            let sub = foldl1 AppT [ConT ''(:<:), ConT ty, tVar]
+            let sub = mkClassPred ''(:<:) [ConT ty, tVar]
             let classCxt = if maxArity == 0
                   then [sub]
-                  else [sub, foldl1 AppT [ConT ''PWitness, AppT (ConT cl) tVar, tVar, tVar]]
+                  else [sub, mkClassPred ''PWitness [AppT (ConT cl) tVar, tVar, tVar]]
             let mkClause c i n a = case pwitSymClause sigVar c i n a of
                   Just clause -> clause
                   Nothing -> errorDerive "derivePWitnessTypeable" info

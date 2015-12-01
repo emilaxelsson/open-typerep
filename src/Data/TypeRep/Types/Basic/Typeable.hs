@@ -17,6 +17,8 @@ module Data.TypeRep.Types.Basic.Typeable where
 
 
 
+import Data.Word
+
 import Language.Syntactic
 
 import Data.TypeRep.Representation
