@@ -61,6 +61,9 @@ library
     Data.TypeRep.Types.IntWord.Typeable
     Data.TypeRep.VarArg
     Data.TypeRep
+    Language.Syntactic.TypeRep
+    Language.Syntactic.TypeRep.Sugar.BindingTR
+    Language.Syntactic.TypeRep.Sugar.TupleTR
 
   other-modules:
     Data.TypeRep.Sub
