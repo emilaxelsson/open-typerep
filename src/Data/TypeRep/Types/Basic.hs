@@ -10,8 +10,6 @@ module Data.TypeRep.Types.Basic where
 
 
 
-import Data.Constraint (Dict (..))
-
 import Language.Syntactic
 
 import Data.TypeRep.Representation
