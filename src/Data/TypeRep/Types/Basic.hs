@@ -10,8 +10,6 @@ module Data.TypeRep.Types.Basic where
 
 
 
-import Data.Word
-
 import Data.Constraint (Dict (..))
 
 import Language.Syntactic
@@ -24,7 +22,6 @@ import Data.TypeRep.TH
 data BoolType   a where Bool_t   :: BoolType   (Full Bool)
 data CharType   a where Char_t   :: CharType   (Full Char)
 data IntType    a where Int_t    :: IntType    (Full Int)
-data WordType   a where Word_t   :: WordType   (Full Word)
 data FloatType  a where Float_t  :: FloatType  (Full Float)
 data DoubleType a where Double_t :: DoubleType (Full Double)
 data ListType   a where List_t   :: ListType (a :-> Full [a])
@@ -38,9 +35,6 @@ charType = sugarSym Char_t
 
 intType :: (Syntactic a, IntType :<: Domain a, Internal a ~ Int) => a
 intType = sugarSym Int_t
-
-wordType :: (Syntactic a, WordType :<: Domain a, Internal a ~ Word) => a
-wordType = sugarSym Word_t
 
 floatType :: (Syntactic a, FloatType :<: Domain a, Internal a ~ Float) => a
 floatType = sugarSym Float_t
@@ -80,7 +74,6 @@ funType = sugarSym Fun_t
 deriveRender_forType ''BoolType
 deriveRender_forType ''CharType
 deriveRender_forType ''IntType
-deriveRender_forType ''WordType
 deriveRender_forType ''FloatType
 deriveRender_forType ''DoubleType
 
@@ -97,7 +90,6 @@ instance Render FunType
 deriveTypeEq ''BoolType
 deriveTypeEq ''CharType
 deriveTypeEq ''IntType
-deriveTypeEq ''WordType
 deriveTypeEq ''FloatType
 deriveTypeEq ''DoubleType
 deriveTypeEq ''ListType
@@ -106,7 +98,6 @@ deriveTypeEq ''FunType
 deriveWitnessAny ''BoolType
 deriveWitnessAny ''CharType
 deriveWitnessAny ''IntType
-deriveWitnessAny ''WordType
 deriveWitnessAny ''FloatType
 deriveWitnessAny ''DoubleType
 deriveWitnessAny ''ListType
@@ -115,7 +106,6 @@ deriveWitnessAny ''FunType
 derivePWitnessAny ''BoolType
 derivePWitnessAny ''CharType
 derivePWitnessAny ''IntType
-derivePWitnessAny ''WordType
 derivePWitnessAny ''FloatType
 derivePWitnessAny ''DoubleType
 derivePWitnessAny ''ListType
@@ -124,7 +114,6 @@ derivePWitnessAny ''FunType
 deriveWitness ''Eq ''BoolType
 deriveWitness ''Eq ''CharType
 deriveWitness ''Eq ''IntType
-deriveWitness ''Eq ''WordType
 deriveWitness ''Eq ''FloatType
 deriveWitness ''Eq ''DoubleType
 deriveWitness ''Eq ''ListType
@@ -132,7 +121,6 @@ deriveWitness ''Eq ''ListType
 derivePWitness ''Eq ''BoolType
 derivePWitness ''Eq ''CharType
 derivePWitness ''Eq ''IntType
-derivePWitness ''Eq ''WordType
 derivePWitness ''Eq ''FloatType
 derivePWitness ''Eq ''DoubleType
 derivePWitness ''Eq ''ListType
@@ -140,7 +128,6 @@ derivePWitness ''Eq ''ListType
 deriveWitness ''Ord ''BoolType
 deriveWitness ''Ord ''CharType
 deriveWitness ''Ord ''IntType
-deriveWitness ''Ord ''WordType
 deriveWitness ''Ord ''FloatType
 deriveWitness ''Ord ''DoubleType
 deriveWitness ''Ord ''ListType
@@ -148,7 +135,6 @@ deriveWitness ''Ord ''ListType
 derivePWitness ''Ord ''BoolType
 derivePWitness ''Ord ''CharType
 derivePWitness ''Ord ''IntType
-derivePWitness ''Ord ''WordType
 derivePWitness ''Ord ''FloatType
 derivePWitness ''Ord ''DoubleType
 derivePWitness ''Ord ''ListType
@@ -156,7 +142,6 @@ derivePWitness ''Ord ''ListType
 deriveWitness ''Show ''BoolType
 deriveWitness ''Show ''CharType
 deriveWitness ''Show ''IntType
-deriveWitness ''Show ''WordType
 deriveWitness ''Show ''FloatType
 deriveWitness ''Show ''DoubleType
 deriveWitness ''Show ''ListType
@@ -164,26 +149,21 @@ deriveWitness ''Show ''ListType
 derivePWitness ''Show ''BoolType
 derivePWitness ''Show ''CharType
 derivePWitness ''Show ''IntType
-derivePWitness ''Show ''WordType
 derivePWitness ''Show ''FloatType
 derivePWitness ''Show ''DoubleType
 derivePWitness ''Show ''ListType
 
 deriveWitness ''Num ''IntType
-deriveWitness ''Num ''WordType
 deriveWitness ''Num ''FloatType
 deriveWitness ''Num ''DoubleType
 
 derivePWitness ''Num ''IntType
-derivePWitness ''Num ''WordType
 derivePWitness ''Num ''FloatType
 derivePWitness ''Num ''DoubleType
 
 deriveWitness ''Integral ''IntType
-deriveWitness ''Integral ''WordType
 
 derivePWitness ''Integral ''IntType
-derivePWitness ''Integral ''WordType
 
 
 
