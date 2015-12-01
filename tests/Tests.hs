@@ -1,4 +1,4 @@
-{-# CPP #-}
+{-# LANGUAGE CPP #-}
 
 import qualified Simple
 #if __GLASGOW_HASKELL__ >= 710
