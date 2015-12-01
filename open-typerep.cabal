@@ -92,21 +92,25 @@ library
 test-suite examples
   type: exitcode-stdio-1.0
 
-  hs-source-dirs: examples
+  hs-source-dirs: examples tests
 
-  main-is: Simple.hs
+  main-is: Tests.hs
 
   default-language: Haskell2010
 
   build-depends:
+    base,
     open-typerep,
-    base
+    syntactic
 
   default-language: Haskell2010
 
   default-extensions:
     FlexibleContexts
+    FlexibleInstances
     GADTs
+    MultiParamTypeClasses
+    ScopedTypeVariables
     TypeOperators
 
 benchmark dynamic-bench

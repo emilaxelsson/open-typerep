@@ -3,6 +3,10 @@
 
 -- This file demonstrates how to create one's own type universe
 
+module Custom where
+
+
+
 import Control.Monad
 
 
