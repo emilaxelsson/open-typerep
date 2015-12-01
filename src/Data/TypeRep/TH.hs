@@ -1,6 +1,15 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Data.TypeRep.TH where
+module Data.TypeRep.TH
+  ( deriveRender_forType
+  , deriveTypeEq
+  , deriveWitness
+  , derivePWitness
+  , deriveWitnessAny
+  , derivePWitnessAny
+  , deriveWitnessTypeable
+  , derivePWitnessTypeable
+  ) where
 
 
 
