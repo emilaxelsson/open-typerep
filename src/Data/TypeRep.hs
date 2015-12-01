@@ -18,17 +18,16 @@ module Data.TypeRep
     , PWitness
     , wit
     , pwit
+    , witTypeable
+    , pwitTypeable
       -- * Dynamic types
     , cast
     , gcast
     , Dynamic (..)
     , toDyn
     , fromDyn
-      -- * Type class witnessing
-    , Any
-    , witTypeable
-    , pwitTypeable
       -- * Misc.
+    , Any
     , pAny
     , pDataTypeable
     , pEq
