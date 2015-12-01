@@ -178,7 +178,7 @@ deriveTypeEq ty = do
             argsP1 = foldr argConsP (ConP 'Nil []) vs1
             argsP2 = foldr argConsP (ConP 'Nil []) vs2
             checkArgs v1 v2 = foldl1 AppE
-                  [ VarE 'typeEq
+                  [ VarE 'typeEqM
                   , AppE (ConE 'TypeRep) (VarE v1), AppE (ConE 'TypeRep) (VarE v2)
                   ]
               -- typeEq (TypeRep v1) (TypeRep v2)

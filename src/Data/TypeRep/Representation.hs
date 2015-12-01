@@ -60,7 +60,7 @@ class Render t => TypeEq t u
         -> (t sig2, Args (AST u) sig2)
         -> Either String (Dict (DenResult sig1 ~ DenResult sig2))
   -- The reason to have `Render` as a super class is not to leak unnecessary stuff in the type of
-  -- `typeEq`.
+  -- `typeEqM`/`typeEq`.
 
 instance (TypeEq t1 t, TypeEq t2 t) => TypeEq (t1 :+: t2) t
   where
@@ -73,8 +73,8 @@ instance TypeEq Empty t
     typeEqSym = error "typeEqSym: Empty"
 
 -- | Equality on type representations
-typeEq :: (TypeEq t t, MonadError String m) => TypeRep t a -> TypeRep t b -> m (Dict (a ~ b))
-typeEq t1@(TypeRep s1) t2@(TypeRep s2) = case go (s1, Nil) (s2, Nil) of
+typeEqM :: (TypeEq t t, MonadError String m) => TypeRep t a -> TypeRep t b -> m (Dict (a ~ b))
+typeEqM t1@(TypeRep s1) t2@(TypeRep s2) = case go (s1, Nil) (s2, Nil) of
     Left _     -> throwError $ "type mismatch: " ++ show t1 ++ " /= " ++ show t2
     Right Dict -> return Dict
   where
@@ -85,6 +85,10 @@ typeEq t1@(TypeRep s1) t2@(TypeRep s2) = case go (s1, Nil) (s2, Nil) of
     go (Sym t1, as1)   (Sym t2, as2)   = typeEqSym (t1,as1) (t2,as2)
     go (s1 :$ a1, as1) (s2 :$ a2, as2) = go (s1, a1 :* as1) (s2, a2 :* as2)
     go _ _ = throwError ""
+
+-- | Equality on type representations
+typeEq :: TypeEq t t => TypeRep t a -> TypeRep t b -> Maybe (Dict (a ~ b))
+typeEq t1 t2 = either (const Nothing) Just $ typeEqM t1 t2
 
 -- | Type constructor matching. This function makes it possible to match on type representations
 -- without dealing with the underlying 'AST' representation.
@@ -182,14 +186,14 @@ pwitTypeable = pwit Proxy
 cast :: forall t a b . (Typeable t a, Typeable t b, TypeEq t t) =>
     Proxy t -> a -> Either String b
 cast _ a = do
-    Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
+    Dict <- typeEqM (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
     return a
 
 -- | Safe generalized cast (does not use @unsafeCoerce@)
 gcast :: forall t a b c . (Typeable t a, Typeable t b, TypeEq t t) =>
     Proxy t -> c a -> Either String (c b)
 gcast _ a = do
-    Dict <- typeEq (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
+    Dict <- typeEqM (typeRep :: TypeRep t a) (typeRep :: TypeRep t b)
     return a
 
 -- | Dynamic type parameterized on a type universe
@@ -202,14 +206,14 @@ toDyn = Dyn typeRep
 
 fromDyn :: forall t a . (Typeable t a, TypeEq t t) => Dynamic t -> Either String a
 fromDyn (Dyn t a) = do
-    Dict <- typeEq t (typeRep :: TypeRep t a)
+    Dict <- typeEqM t (typeRep :: TypeRep t a)
     return a
 
 instance (TypeEq t t, Witness Eq t t) => Eq (Dynamic t)
   where
     Dyn ta a == Dyn tb b
-        | Right Dict <- typeEq ta tb
-        , Dict       <- wit (Proxy :: Proxy Eq) ta
+        | Just Dict <- typeEq ta tb
+        , Dict      <- wit (Proxy :: Proxy Eq) ta
         = a == b
     _ == _ = False
 

@@ -21,7 +21,7 @@ hlist = [toDyn True, toDyn (1 :: Int)]
 addDyn :: (TypeEq ts ts, PWitness Num ts ts) =>
     Dynamic ts -> Dynamic ts -> Either String (Dynamic ts)
 addDyn (Dyn ta a) (Dyn tb b) = do
-    Dict <- typeEq ta tb
+    Dict <- typeEqM ta tb
     Dict <- pwit pNum ta
     return (Dyn ta (a+b))
 

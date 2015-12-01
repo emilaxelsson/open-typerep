@@ -10,6 +10,7 @@ module Data.TypeRep
     , TypeRep
     , typeRep
     , TypeEq
+    , typeEqM
     , typeEq
     , matchCon
     , matchConM
