@@ -21,10 +21,6 @@ import Data.TypeRep.TH
 
 
 
---------------------------------------------------------------------------------
--- * Specific type representations
---------------------------------------------------------------------------------
-
 data BoolType   a where Bool_t   :: BoolType   (Full Bool)
 data CharType   a where Char_t   :: CharType   (Full Char)
 data IntType    a where Int_t    :: IntType    (Full Int)
@@ -210,15 +206,4 @@ instance PWitness Integral FloatType  t
 instance PWitness Integral DoubleType t
 instance PWitness Integral ListType   t
 instance PWitness Integral FunType    t
-
-
-
---------------------------------------------------------------------------------
--- * Misc.
---------------------------------------------------------------------------------
-
-dynToInteger :: PWitness Integral t t => Dynamic t -> Either String Integer
-dynToInteger (Dyn tr a) = do
-    Dict <- pwit pIntegral tr
-    return (toInteger a)
 
