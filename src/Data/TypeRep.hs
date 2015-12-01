@@ -29,6 +29,7 @@ module Data.TypeRep
     , pwitTypeable
       -- * Misc.
     , pAny
+    , pDataTypeable
     , pEq
     , pOrd
     , pShow

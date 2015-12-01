@@ -10,6 +10,8 @@ module Data.TypeRep.Types.Basic where
 
 
 
+import qualified Data.Typeable as Typeable
+
 import Language.Syntactic
 
 import Data.TypeRep.Representation
@@ -108,6 +110,22 @@ derivePWitnessAny ''FloatType
 derivePWitnessAny ''DoubleType
 derivePWitnessAny ''ListType
 derivePWitnessAny ''FunType
+
+deriveWitness ''Typeable.Typeable ''BoolType
+deriveWitness ''Typeable.Typeable ''CharType
+deriveWitness ''Typeable.Typeable ''IntType
+deriveWitness ''Typeable.Typeable ''FloatType
+deriveWitness ''Typeable.Typeable ''DoubleType
+deriveWitness ''Typeable.Typeable ''ListType
+deriveWitness ''Typeable.Typeable ''FunType
+
+derivePWitness ''Typeable.Typeable ''BoolType
+derivePWitness ''Typeable.Typeable ''CharType
+derivePWitness ''Typeable.Typeable ''IntType
+derivePWitness ''Typeable.Typeable ''FloatType
+derivePWitness ''Typeable.Typeable ''DoubleType
+derivePWitness ''Typeable.Typeable ''ListType
+derivePWitness ''Typeable.Typeable ''FunType
 
 deriveWitness ''Eq ''BoolType
 deriveWitness ''Eq ''CharType

@@ -11,6 +11,7 @@ module Data.TypeRep.Types.Tuple where
 
 
 import Data.List (intercalate)
+import qualified Data.Typeable as Typeable
 
 import Language.Syntactic
 
@@ -141,11 +142,15 @@ deriveTypeEq ''TupleType
 
 deriveWitnessAny ''TupleType
 
+deriveWitness ''Typeable.Typeable ''TupleType
+
 deriveWitness ''Eq   ''TupleType
 deriveWitness ''Ord  ''TupleType
 deriveWitness ''Show ''TupleType
 
 derivePWitnessAny ''TupleType
+
+derivePWitness ''Typeable.Typeable ''TupleType
 
 derivePWitness ''Eq   ''TupleType
 derivePWitness ''Ord  ''TupleType

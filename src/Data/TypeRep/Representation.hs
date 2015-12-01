@@ -8,6 +8,7 @@ module Data.TypeRep.Representation where
 
 import Control.Monad.Except
 import Data.Char (isAlphaNum)
+import qualified Data.Typeable as Typeable
 
 import Data.Constraint (Constraint, Dict (..))
 import Data.Proxy (Proxy (..))
@@ -232,17 +233,23 @@ class ShowClass (p :: * -> Constraint)
     -- | Show the name of a type class
     showClass :: Proxy p -> String
 
-instance ShowClass Any          where showClass _ = "Any"
-instance ShowClass Eq           where showClass _ = "Eq"
-instance ShowClass Ord          where showClass _ = "Ord"
-instance ShowClass Show         where showClass _ = "Show"
-instance ShowClass Num          where showClass _ = "Num"
-instance ShowClass Integral     where showClass _ = "Integral"
-instance ShowClass (Typeable t) where showClass _ = "Typeable ..."
+instance ShowClass Any               where showClass _ = "Any"
+instance ShowClass Typeable.Typeable where showClass _ = "Data.Typeable"
+instance ShowClass Eq                where showClass _ = "Eq"
+instance ShowClass Ord               where showClass _ = "Ord"
+instance ShowClass Show              where showClass _ = "Show"
+instance ShowClass Num               where showClass _ = "Num"
+instance ShowClass Integral          where showClass _ = "Integral"
+instance ShowClass (Typeable t)      where showClass _ = "Typeable t"
 
 -- | Proxy of 'Any' class. Can be passed to 'wit' and 'pwit'.
 pAny :: Proxy Any
 pAny = Proxy
+
+-- | Proxy of 'Typeable.Typeable' class (from the base library). Can be passed
+-- to 'wit' and 'pwit'.
+pDataTypeable :: Proxy Typeable.Typeable
+pDataTypeable = Proxy
 
 -- | Proxy of 'Eq' class. Can be passed to 'wit' and 'pwit'.
 pEq :: Proxy Eq

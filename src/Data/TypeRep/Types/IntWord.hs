@@ -11,6 +11,7 @@ module Data.TypeRep.Types.IntWord where
 
 
 import Data.Int
+import qualified Data.Typeable as Typeable
 import Data.Word
 
 import Language.Syntactic
@@ -59,12 +60,14 @@ deriveTypeEq         ''IntWordType
 deriveWitnessAny     ''IntWordType
 derivePWitnessAny    ''IntWordType
 
+deriveWitness ''Typeable.Typeable ''IntWordType
 deriveWitness ''Eq       ''IntWordType
 deriveWitness ''Ord      ''IntWordType
 deriveWitness ''Show     ''IntWordType
 deriveWitness ''Num      ''IntWordType
 deriveWitness ''Integral ''IntWordType
 
+derivePWitness ''Typeable.Typeable ''IntWordType
 derivePWitness ''Eq       ''IntWordType
 derivePWitness ''Ord      ''IntWordType
 derivePWitness ''Show     ''IntWordType
