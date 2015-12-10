@@ -64,6 +64,7 @@ library
     Language.Syntactic.TypeRep
     Language.Syntactic.TypeRep.Sugar.BindingTR
     Language.Syntactic.TypeRep.Sugar.TupleTR
+    Language.Syntactic.TypeRep.TupleConversion
 
   other-modules:
     Data.TypeRep.Sub
