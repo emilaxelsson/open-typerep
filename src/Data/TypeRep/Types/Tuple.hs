@@ -13,7 +13,7 @@ module Data.TypeRep.Types.Tuple where
 import Data.List (intercalate)
 import qualified Data.Typeable as Typeable
 
-import Data.Orphans
+import Data.Orphans ()
 
 import Language.Syntactic
 
