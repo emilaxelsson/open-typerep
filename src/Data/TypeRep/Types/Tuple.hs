@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -13,7 +14,9 @@ module Data.TypeRep.Types.Tuple where
 import Data.List (intercalate)
 import qualified Data.Typeable as Typeable
 
+#if __GLASGOW_HASKELL__ < 710
 import Data.Orphans ()
+#endif
 
 import Language.Syntactic
 
