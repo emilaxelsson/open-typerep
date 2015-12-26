@@ -1,5 +1,5 @@
 name:                open-typerep
-version:             0.4
+version:             0.5
 synopsis:            Open type representations and dynamic types
 description:         This package uses Data Types à la Carte to provide open type representations
                      and dynamic types/coercions for open type universes.
