@@ -1,5 +1,5 @@
 name:                open-typerep
-version:             0.5
+version:             0.6
 synopsis:            Open type representations and dynamic types
 description:         This package uses Data Types à la Carte to provide open type representations
                      and dynamic types/coercions for open type universes.
@@ -30,7 +30,7 @@ description:         This package uses Data Types à la Carte to provide open ty
                      time.
 author:              Emil Axelsson
 maintainer:          emax@chalmers.se
-copyright:           Copyright (c) 2014, Emil Axelsson
+copyright:           Copyright (c) 2014-2016, Emil Axelsson
 license:             BSD3
 license-file:        LICENSE
 homepage:            https://github.com/emilaxelsson/open-typerep
@@ -61,10 +61,6 @@ library
     Data.TypeRep.Types.IntWord.Typeable
     Data.TypeRep.VarArg
     Data.TypeRep
-    Language.Syntactic.TypeRep
-    Language.Syntactic.TypeRep.Sugar.BindingTR
-    Language.Syntactic.TypeRep.Sugar.TupleTR
-    Language.Syntactic.TypeRep.TupleConversion
 
   other-modules:
     Data.TypeRep.Sub
@@ -74,7 +70,8 @@ library
     constraints >=0.3,
     mtl         >=2.2.1,
       -- Smallest version that has Control.Monad.Except
-    syntactic   >=3.3,
+    syntactic   >=3.1,
+      -- Smallest version that has Language.Syntactic.TH
     tagged      >=0.4,
     template-haskell
 
@@ -93,10 +90,6 @@ library
     ScopedTypeVariables
     TypeFamilies
     TypeOperators
-
-  other-extensions:
-    UndecidableInstances,
-    OverlappingInstances
 
 test-suite examples
   type: exitcode-stdio-1.0
