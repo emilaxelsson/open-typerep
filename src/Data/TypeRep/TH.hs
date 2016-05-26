@@ -38,6 +38,15 @@ viewEqPred _ = Nothing
   -- This function is just here to provide compatibility with
   -- template-haskell < 2.10
 
+-- | Get the type index and constructors of a data type definition
+viewDataDefWithTyVar :: Info -> Maybe (TyVarBndr, [Con])
+#if MIN_VERSION_template_haskell(2,11,0)
+viewDataDefWithTyVar (TyConI (DataD _ _ [tv] _ cs _)) = Just (tv,cs)
+#else
+viewDataDefWithTyVar (TyConI (DataD _ _ [tv] cs _)) = Just (tv,cs)
+#endif
+viewDataDefWithTyVar _ = Nothing
+
 -- | Construct a 'Pred' of the form @(Cl t1 t2 ...)@
 mkClassPred :: Name -> [Type] -> Pred
 #if MIN_VERSION_template_haskell(2,10,0)
@@ -80,6 +89,14 @@ errorDerive fun info = error $ unlines
     , indent 8 $ pprint info
     ]
 
+-- | Count the number of arrows in a type @a `:->` b `:->` ...@
+countArrows :: Type -> Maybe Int
+countArrows (AppT (AppT arrow _) res)
+    | arrow == ConT ''(:->) = fmap (+1) $ countArrows res
+countArrows (AppT (ConT full) _)
+    | full == ''Full        = Just 0
+countArrows _ = Nothing
+
 -- | Get the arity of a symbol. If the type is not declared according to what
 -- is stated for 'errorDerive', 'Nothing' is returned.
 symArity
@@ -89,14 +106,12 @@ symArity
 symArity sigVar (ForallC _ [cxt] (NormalC _ []))
     | Just (VarT sigVar', sig) <- viewEqPred cxt
     , sigVar == sigVar'
-    = count sig
-  where
-    count :: Type -> Maybe Int
-    count (AppT (AppT arrow _) res)
-        | arrow == ConT ''(:->) = fmap (+1) $ count res
-    count (AppT (ConT full) _)
-        | full == ''Full        = Just 0
-    count _ = Nothing
+    = countArrows sig
+symArity sigVar (ForallC _ _ c) = symArity sigVar c
+#if MIN_VERSION_template_haskell(2,11,0)
+symArity _ (GadtC _ _ (AppT _ t))    = countArrows t
+symArity _ (RecGadtC _ _ (AppT _ t)) = countArrows t
+#endif
 symArity _ _ = Nothing
 
 -- | Construct a pattern @v `:*` pat@
@@ -149,8 +164,8 @@ deriveTypeEq
     -> DecsQ
 deriveTypeEq ty = do
     info <- reify ty
-    case info of
-        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+    case viewDataDefWithTyVar info of
+        Just (sigVarTV,cs) -> do
             throwErrExp <- [| throwError "" |]
               -- `typeEq` will turn this into a proper error message
             let sigVar = tyVarName sigVarTV
@@ -206,8 +221,8 @@ deriveWitness
     -> DecsQ
 deriveWitness cl ty = do
     info <- reify ty
-    case info of
-        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+    case viewDataDefWithTyVar info of
+        Just (sigVarTV,cs) -> do
             let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
@@ -246,8 +261,8 @@ derivePWitness
     -> DecsQ
 derivePWitness cl ty = do
     info <- reify ty
-    case info of
-        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+    case viewDataDefWithTyVar info of
+        Just (sigVarTV,cs) -> do
             let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
@@ -324,8 +339,8 @@ deriveWitnessTypeable
     -> DecsQ
 deriveWitnessTypeable ty = do
     info <- reify ty
-    case info of
-        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+    case viewDataDefWithTyVar info of
+        Just (sigVarTV,cs) -> do
             let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
@@ -365,8 +380,8 @@ derivePWitnessTypeable
     -> DecsQ
 derivePWitnessTypeable ty = do
     info <- reify ty
-    case info of
-        TyConI (DataD _ _ [sigVarTV] cs _) -> do
+    case viewDataDefWithTyVar info of
+        Just (sigVarTV,cs) -> do
             let sigVar = tyVarName sigVarTV
             let maxArity = case mapM (symArity sigVar) cs of
                   Just as -> maximum (0:as)
